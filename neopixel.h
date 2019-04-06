@@ -60,6 +60,12 @@ HslColor hslBlue(blue);
 HslColor hslWhite(white);
 HslColor hslBlack(black);
 
+// you loose the original color the lower the dim value used
+// here due to quantization
+const uint8_t c_MinBrightness = 8; 
+const uint8_t c_MaxBrightness = 255;
+uint8_t maxBrightness = 255;
+
 void setNeoLedsByStr(const String& s) {
   int colonIndex = s.indexOf(':');
   String key = s.substring(0, colonIndex);
@@ -98,6 +104,23 @@ void setNeoLedsByStr(const String& s) {
     }
   }
 }
+
+int _p = 100;
+
+void setBrightnessPercent(int p) {
+  _p=p;
+  Serial.println("Setting brightness to " + String(p) + "%, which is " + String(c_MinBrightness + int(p * 0.01 * (maxBrightness - c_MinBrightness))));
+  strip.SetBrightness(c_MinBrightness + int(p * 0.01 * (maxBrightness - c_MinBrightness)));
+  strip.Show();
+}
+void setMaxBrightness(uint8_t v) {
+  Serial.println("Setting max brightness to " + String(v));
+  maxBrightness = v;
+//  if (strip.GetBrightness() > maxBrightness)
+//    strip.SetBrightness(maxBrightness);
+setBrightnessPercent(_p);
+}
+
 
 /*
 int i =0;

@@ -36,7 +36,7 @@ String topic_command_neopixel;
 String topic_event_keypad;
 
 unsigned long dhtMeasurementPeriodMs = 10000;
-unsigned long lightMeasurementPeriodMs = 10000;
+unsigned long lightMeasurementPeriodMs = 3000;
 
 const int buttonPin = D3;
 const int ledPin = 13;
@@ -121,6 +121,11 @@ void messageReceived(String &topic, String &payload) {
         }
         strip.Show();
         Serial.println("Cleared all LEDs");
+      }
+      else if (payload.startsWith("brightness")) 
+      {
+        int p = payload.substring(payload.indexOf(' ') + 1).toInt();
+        setBrightnessPercent(p);  
       }
       else 
       {
@@ -452,6 +457,7 @@ void publishSensorStatus() {
     lastMillisLight = now;
     Serial.println("Publishing Light data");
     client.publish(topic41, String(photoLoop()));
+    setMaxBrightness(int((1024 - photoLoop()) / 1024.0 * c_MaxBrightness));
   }
 }
 

@@ -5,7 +5,7 @@ void photoSetup(){
 }
 
 int photoLoop(void) {
-  Serial.print("photo: ");
-  Serial.println(1024-analogRead(A0));
+  // Serial.print("photo: ");
+  // Serial.println(1024-analogRead(A0));
   return 1024-analogRead(A0);
 }

@@ -1,0 +1,186 @@
+[
+    {
+        "id": "f9533b9e.adb958",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "3fc47a3d.9e6616",
+        "type": "mqtt in",
+        "z": "f9533b9e.adb958",
+        "name": "c715d",
+        "topic": "/teams/team2/devices/c715d/#",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "aada5e50.aaa12",
+        "x": 100,
+        "y": 100,
+        "wires": [
+            [
+                "a1441f59.01c9a"
+            ]
+        ]
+    },
+    {
+        "id": "a1441f59.01c9a",
+        "type": "debug",
+        "z": "f9533b9e.adb958",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 290,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "b51b5927.199618",
+        "type": "mqtt in",
+        "z": "f9533b9e.adb958",
+        "name": "c715d keypad events",
+        "topic": "/teams/team2/devices/c715d/events/keypad",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "aada5e50.aaa12",
+        "x": 170,
+        "y": 220,
+        "wires": [
+            [
+                "3eefaccf.0a2494",
+                "1b510465.e5312c"
+            ]
+        ]
+    },
+    {
+        "id": "3eefaccf.0a2494",
+        "type": "debug",
+        "z": "f9533b9e.adb958",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 400,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "dfd79fb4.677e5",
+        "type": "mqtt out",
+        "z": "f9533b9e.adb958",
+        "name": "c715d neopixel cmds",
+        "topic": "/teams/team2/devices/c715d/commands/neopixel",
+        "qos": "",
+        "retain": "",
+        "broker": "aada5e50.aaa12",
+        "x": 360,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "1b510465.e5312c",
+        "type": "function",
+        "z": "f9533b9e.adb958",
+        "name": "set all",
+        "func": "var payload=msg.payload;\n\nvar ret = { payload: \"clear\" };\n\n\nswitch (payload)\n{\n    case \"0\":\n    ret.payload = \"set all:#FF6F61\";\n    break;\n    case \"1\":\n    ret.payload = \"set all:#6B5B95\";\n    break;\n    case \"2\":\n    ret.payload = \"set all:#9B1B30\";\n    break;\n    case \"3\":\n    ret.payload = \"set all:#F5D6C6\";\n    break;\n    case \"4\":\n    ret.payload = \"set all:#77212E\";\n    break;\n    case \"5\":\n    ret.payload = \"clear\";\n    break;\n    case \"6\":\n    ret.payload = \"set all:#5A3E36\";\n    break;\n    case \"7\":\n    ret.payload = \"set all:#CE5B78\";\n    break;\n    case \"8\":\n    ret.payload = \"set all:#935529\";\n    break;\n    case \"9\":\n    ret.payload = \"set all:#E08119\";\n    break;\n    case \"#\":\n    ret.payload = \"set all:#000000;1:#101010;2-3:#302010;8-10:#001000\";\n    break;\n    case \"*\":\n    ret.payload = \"set all:#000000;0-12:#FFFFFF\";\n    break;\n}\nreturn ret;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 120,
+        "y": 340,
+        "wires": [
+            [
+                "dfd79fb4.677e5"
+            ]
+        ]
+    },
+    {
+        "id": "771a9849.3db5d8",
+        "type": "mqtt in",
+        "z": "f9533b9e.adb958",
+        "name": "24b5e8 potmeter events",
+        "topic": "/teams/team2/devices/24b5e8/events/potmeter",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "aada5e50.aaa12",
+        "x": 270,
+        "y": 460,
+        "wires": [
+            [
+                "1e20e420.06fe8c",
+                "67f87aa1.181354"
+            ]
+        ]
+    },
+    {
+        "id": "1e20e420.06fe8c",
+        "type": "debug",
+        "z": "f9533b9e.adb958",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 490,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "29988082.1bf81",
+        "type": "mqtt out",
+        "z": "f9533b9e.adb958",
+        "name": "c715d neopixel cmds",
+        "topic": "/teams/team2/devices/c715d/commands/neopixel",
+        "qos": "",
+        "retain": "",
+        "broker": "aada5e50.aaa12",
+        "x": 450,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "67f87aa1.181354",
+        "type": "function",
+        "z": "f9533b9e.adb958",
+        "name": "change brightness",
+        "func": "var payload=msg.payload;\nvar num = parseInt(payload);\n\nvar ret = { payload: \"brightness \" + Math.floor(num/1024*100) };\n\nreturn ret;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 250,
+        "y": 580,
+        "wires": [
+            [
+                "29988082.1bf81"
+            ]
+        ]
+    },
+    {
+        "id": "aada5e50.aaa12",
+        "type": "mqtt-broker",
+        "z": "",
+        "name": "eestech challenge",
+        "broker": "vm1.siroki.cc",
+        "port": "8883",
+        "tls": "",
+        "clientid": "",
+        "usetls": true,
+        "compatmode": true,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    }
+]
