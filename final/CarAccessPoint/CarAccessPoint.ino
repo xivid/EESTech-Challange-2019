@@ -28,27 +28,60 @@ WiFiServer server(80);
 /* Car control */
 void forward() {
   lastCommand = "forward";
-  // TODO
+  digitalWrite(19, 1);
+}
+
+void cancelForward() {
+  lastCommand = "cancelForward";
+  digitalWrite(19, 0);
 }
 
 void backward() {
   lastCommand = "backward";
-  // TODO
+  digitalWrite(21, 1);
+}
+
+void cancelBackward() {
+  lastCommand = "cancelBackward";
+  digitalWrite(21, 0);
 }
 
 void left() {
   lastCommand = "left";
-  // TODO
+  digitalWrite(22, 1);
+}
+
+void cancelLeft() {
+  lastCommand = "cancelLeft";
+  digitalWrite(22, 0);
 }
 
 void right() {
   lastCommand = "right";
-  // TODO
+  digitalWrite(23, 1);
+}
+
+void cancelRight() {
+  lastCommand = "cancelRight";
+  digitalWrite(23, 0);
+}
+
+void still() {
+  lastCommand = "still";
+  
+  digitalWrite(19, 0);
+  digitalWrite(21, 0);
+  digitalWrite(22, 0);
+  digitalWrite(23, 0);
 }
 /* Car control end */
 
 void setup() {
 //  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(19, OUTPUT);
+  pinMode(21, OUTPUT);
+  pinMode(22, OUTPUT);
+  pinMode(23, OUTPUT);
 
   Serial.begin(115200);
   Serial.println();
@@ -89,17 +122,22 @@ void setup() {
 //      Serial.println();
       if (packet.length() > 0) {
         char c = *(char*)packet.data();
-        Serial.print("c="); Serial.print(c);
+        Serial.print("c="); Serial.println(c);
         switch (c) {
           case 'f': forward(); break;
           case 'b': backward(); break;
           case 'l': left(); break;
           case 'r': right(); break;
+          case 'F': cancelForward(); break;
+          case 'B': cancelBackward(); break;
+          case 'L': cancelLeft(); break;
+          case 'R': cancelRight(); break;
           default: Serial.println("Unknown data, dropped");
         }
+        
+        //reply to the client
+        packet.printf("Got %c", c);
       }
-      //reply to the client
-//      packet.printf("Got %u bytes of data", packet.length());
   });  
 }
 

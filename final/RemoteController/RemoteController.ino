@@ -17,6 +17,7 @@ const char* password = "LQWLQWLQW";
 const char* host = "192.168.4.1";
 const int httpPort = 80;
 AsyncUDP udp;
+char* currentCommand = NULL;
 
 void setup()
 {
@@ -60,12 +61,14 @@ void setup()
             Serial.print(", Data: ");
             Serial.write(packet.data(), packet.length());
             Serial.println();
-            //reply to the client
-            packet.printf("Got %u bytes of data", packet.length());
+            // if received something, clear command
+            currentCommand = NULL;
         });
         //Send unicast
         udp.print("Hello Server!");
     }
+
+    customKeypad.addEventListener(keypadEvent);
 }
 
 void sendCommand(char* command) {
@@ -76,11 +79,38 @@ void sendCommand(char* command) {
 
 void loop()
 {
-    char customKey = customKeypad.getKey();
-    switch (customKey) {
-      case '2': sendCommand("forward"); break;
-      case '8': sendCommand("backward"); break;
-      case '4': sendCommand("left"); break;
-      case '6': sendCommand("right"); break;
+    customKeypad.getKey();
+    if (currentCommand) {
+      sendCommand(currentCommand);
+    }
+}
+
+
+// Taking care of some special events.
+void keypadEvent(KeypadEvent key){
+    switch (customKeypad.getState()){
+      case PRESSED:
+        Serial.print("PRESSED "); Serial.println(key);
+        switch (key) {
+          case '2': currentCommand = "forward"; break;
+          case '8': currentCommand = "backward"; break;
+          case '4': currentCommand = "left"; break;
+          case '6': currentCommand = "right"; break;
+        }
+        break;
+
+     case RELEASED:
+        Serial.print("RELEASED "); Serial.println(key);
+        switch (key) {
+          case '2': currentCommand = "ForwardCancel"; break;
+          case '8': currentCommand = "BackwardCancel"; break;
+          case '4': currentCommand = "LeftCancel"; break;
+          case '6': currentCommand = "RightCancel"; break;
+        }
+        break;
+
+      case HOLD:
+        Serial.print("HOLDING "); Serial.println(key);
+        break;
     }
 }
