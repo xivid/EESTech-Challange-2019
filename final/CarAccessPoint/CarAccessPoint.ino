@@ -14,6 +14,7 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WiFiAP.h>
+#include <AsyncUDP.h>
 
 //#define LED_BUILTIN 2   // Set the GPIO pin where you connected your test LED or comment this line out if your dev board has a built-in LED
 
@@ -21,6 +22,7 @@
 const char *ssid = "SmartCar";
 const char *password = "LQWLQWLQW";
 char *lastCommand = "";
+AsyncUDP udp;
 WiFiServer server(80);
 
 /* Car control */
@@ -61,16 +63,51 @@ void setup() {
   Serial.println(password);
   Serial.print("AP IP address: ");
   Serial.println(myIP);
+  Serial.println("Setup HTTP server on port 80");
   server.begin();
 
-  Serial.println("Server started");
+  while (!udp.listen(1234)) {
+    Serial.println("UDP unable to listen on 1234, retrying...");
+  }
+  Serial.print("UDP Listening on IP: ");
+  Serial.println(WiFi.localIP());
+  udp.onPacket([](AsyncUDPPacket packet) {
+//      Serial.print("UDP Packet Type: ");
+//      Serial.print(packet.isBroadcast()?"Broadcast":packet.isMulticast()?"Multicast":"Unicast");
+//      Serial.print(", From: ");
+//      Serial.print(packet.remoteIP());
+//      Serial.print(":");
+//      Serial.print(packet.remotePort());
+//      Serial.print(", To: ");
+//      Serial.print(packet.localIP());
+//      Serial.print(":");
+//      Serial.print(packet.localPort());
+//      Serial.print(", Length: ");
+//      Serial.print(packet.length());
+//      Serial.print(", Data: ");
+//      Serial.write(packet.data(), packet.length());
+//      Serial.println();
+      if (packet.length() > 0) {
+        char c = *(char*)packet.data();
+        Serial.print("c="); Serial.print(c);
+        switch (c) {
+          case 'f': forward(); break;
+          case 'b': backward(); break;
+          case 'l': left(); break;
+          case 'r': right(); break;
+          default: Serial.println("Unknown data, dropped");
+        }
+      }
+      //reply to the client
+//      packet.printf("Got %u bytes of data", packet.length());
+  });  
 }
 
 void loop() {
   WiFiClient client = server.available();   // listen for incoming clients
 
   if (client) {                             // if you get a client,
-    Serial.println("New Client.");           // print a message out the serial port
+    Serial.println("New HTTP Client.");           // print a message out the serial port
     String currentLine = "";                // make a String to hold incoming data from the client
     while (client.connected()) {            // loop while the client's connected
       if (client.available()) {             // if there's bytes to read from the client,
@@ -88,12 +125,7 @@ void loop() {
             client.println();
 
             // the content of the HTTP response follows the header:
-            client.print("Send HTTP GET request to:<br>");
-            client.print("<a href=\"/forward\">/forward</a> to go forward.<br>");
-            client.print("<a href=\"/backward\">/backward</a> to go backward.<br>");
-            client.print("<a href=\"/left\">/left</a> to turn left.<br>");
-            client.print("<a href=\"/right\">/right</a> to turn right.<br>");
-            client.print("Last command:"); client.print(lastCommand); client.print("<br>");
+            client.print("<h1>Last command:"); client.print(lastCommand); client.print("</h1>");
 
             // The HTTP response ends with another blank line:
             client.println();
@@ -105,24 +137,10 @@ void loop() {
         } else if (c != '\r') {  // if you got anything else but a carriage return character,
           currentLine += c;      // add it to the end of the currentLine
         }
-
-        // Check the client request
-        if (currentLine.endsWith("GET /forward")) {
-          forward();
-        }
-        if (currentLine.endsWith("GET /backward")) {
-          backward();
-        }
-        if (currentLine.endsWith("GET /left")) {
-          left();
-        }
-        if (currentLine.endsWith("GET /right")) {
-          right();
-        }
       }
     }
     // close the connection:
     client.stop();
-    Serial.println("Client Disconnected.");
+    Serial.println("HTTP Client Disconnected.");
   }
 }
