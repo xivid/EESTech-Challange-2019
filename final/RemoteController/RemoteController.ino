@@ -1,3 +1,4 @@
+
 /*
  *  This sketch sends data via HTTP GET requests to data.sparkfun.com service.
  *
@@ -7,13 +8,15 @@
  */
 
 #include <WiFi.h>
+#include "AsyncUDP.h"
+#include "myKeypad.h"
 
 const char* ssid     = "SmartCar";
 const char* password = "LQWLQWLQW";
 
 const char* host = "192.168.4.1";
 const int httpPort = 80;
-WiFiClient client;
+AsyncUDP udp;
 
 void setup()
 {
@@ -38,55 +41,46 @@ void setup()
     Serial.println("WiFi connected");
     Serial.println("IP address: ");
     Serial.println(WiFi.localIP());
-    
-    // Use WiFiClient class to create TCP connections
-    Serial.print("connecting to ");
-    Serial.println(host);
-    if (!client.connect(host, httpPort)) {
-        Serial.println("connection failed");
+
+    if(udp.connect(IPAddress(192,168,4,1), 1234)) {
+        Serial.println("UDP connected");
+        udp.onPacket([](AsyncUDPPacket packet) {
+            Serial.print("UDP Packet Type: ");
+            Serial.print(packet.isBroadcast()?"Broadcast":packet.isMulticast()?"Multicast":"Unicast");
+            Serial.print(", From: ");
+            Serial.print(packet.remoteIP());
+            Serial.print(":");
+            Serial.print(packet.remotePort());
+            Serial.print(", To: ");
+            Serial.print(packet.localIP());
+            Serial.print(":");
+            Serial.print(packet.localPort());
+            Serial.print(", Length: ");
+            Serial.print(packet.length());
+            Serial.print(", Data: ");
+            Serial.write(packet.data(), packet.length());
+            Serial.println();
+            //reply to the client
+            packet.printf("Got %u bytes of data", packet.length());
+        });
+        //Send unicast
+        udp.print("Hello Server!");
     }
 }
 
-void requestGet(char* url) {
-    while (!client.connected()) {
-      Serial.println("Client not connected, reconnecting...");
-      if (!client.connect(host, httpPort)) {
-        Serial.println("connection failed");
-      }
-    }
-    
-    // We now create a URI for the request
-    Serial.print("Requesting URL: /");
-    Serial.println(url);
-
-    // This will send the request to the server
-    client.print(String("GET /") + String(url) + " HTTP/1.1\r\n" +
-                 "Host: " + host + "\r\n" +
-                 "Connection: Keep-Alive\r\n\r\n");
-
-//    Get response (no need?)
-    unsigned long timeout = millis();
-    while (client.available() == 0) {
-        if (millis() - timeout > 5000) {
-            Serial.println(">>> Client Timeout !");
-            client.stop();
-            return;
-        }
-    }
-
-    // Read all the lines of the reply from server and print them to Serial
-    while(client.available()) {
-        String line = client.readStringUntil('\r');
-        Serial.print(line);
-    }
+void sendCommand(char* command) {
+    Serial.print("Sending command ");
+    Serial.println(command);
+    udp.print(command);
 }
 
-int value = 0;
-char* commands[] = {"forward", "backward", "left", "right"};
 void loop()
 {
-    // TODO get command
-    delay(5000);
-    char* command = commands[value++ % 4];
-    requestGet(command);
+    char customKey = customKeypad.getKey();
+    switch (customKey) {
+      case '2': sendCommand("forward"); break;
+      case '8': sendCommand("backward"); break;
+      case '4': sendCommand("left"); break;
+      case '6': sendCommand("right"); break;
+    }
 }
