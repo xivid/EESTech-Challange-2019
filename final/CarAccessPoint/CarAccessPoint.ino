@@ -28,52 +28,59 @@ WiFiServer server(80);
 /* Car control */
 void forward() {
   lastCommand = "forward";
+  Serial.println("sending 19->1");
   digitalWrite(19, 1);
 }
 
 void cancelForward() {
   lastCommand = "cancelForward";
+    Serial.println("sending 19->0");
+
   digitalWrite(19, 0);
 }
 
 void backward() {
   lastCommand = "backward";
+      Serial.println("sending 21->1");
+
   digitalWrite(21, 1);
 }
 
 void cancelBackward() {
   lastCommand = "cancelBackward";
+        Serial.println("sending 21->0");
+
   digitalWrite(21, 0);
 }
 
 void left() {
   lastCommand = "left";
+          Serial.println("sending 22->1");
+
   digitalWrite(22, 1);
 }
 
 void cancelLeft() {
   lastCommand = "cancelLeft";
+            Serial.println("sending 22->0");
+
   digitalWrite(22, 0);
 }
 
 void right() {
   lastCommand = "right";
+            Serial.println("sending 23->1");
+
   digitalWrite(23, 1);
 }
 
 void cancelRight() {
   lastCommand = "cancelRight";
+            Serial.println("sending 23->0");
+
   digitalWrite(23, 0);
 }
 
-void still() {
-  lastCommand = "still";
-  
-  digitalWrite(19, 0);
-  digitalWrite(21, 0);
-  digitalWrite(22, 0);
-  digitalWrite(23, 0);
-}
 /* Car control end */
 
 void setup() {
@@ -82,6 +89,10 @@ void setup() {
   pinMode(21, OUTPUT);
   pinMode(22, OUTPUT);
   pinMode(23, OUTPUT);
+  digitalWrite(19, 0);
+  digitalWrite(21, 0);
+  digitalWrite(22, 0);
+  digitalWrite(23, 0);
 
   Serial.begin(115200);
   Serial.println();
